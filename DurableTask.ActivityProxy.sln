@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleApp", "SampleApp\SampleApp.csproj", "{BD2216B7-FAD4-4FDB-8EA0-58D37FC4364B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DurableTask.ActivityProxy", "DurableTask.ActivityProxy\DurableTask.ActivityProxy.csproj", "{E0BF361F-C4A7-45AA-93E8-D1E2410BC04D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DurableTask.ActivityProxy", "DurableTask.ActivityProxy\DurableTask.ActivityProxy.csproj", "{E0BF361F-C4A7-45AA-93E8-D1E2410BC04D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

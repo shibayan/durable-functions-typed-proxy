@@ -77,25 +77,25 @@ namespace Microsoft.Azure.WebJobs
             {
                 var parameters = methodInfo.GetParameters();
 
-                // check that the number of arguments is zero or one
-                if (parameters.Length > 1)
+                // check that the number of arguments is one
+                if (parameters.Length != 1)
                 {
                     throw new InvalidOperationException("Only a single argument can be used for operation input.");
                 }
 
                 var returnType = methodInfo.ReturnType;
 
-                // check that return type is void / Task / Task<T>.
-                if (returnType != typeof(void) && !(returnType == typeof(Task) || returnType.BaseType == typeof(Task)))
+                // check that return type is Task or Task<T>.
+                if (!(returnType == typeof(Task) || returnType.BaseType == typeof(Task)))
                 {
-                    throw new InvalidOperationException("Only a return type is void / Task / Task<T>.");
+                    throw new InvalidOperationException("Only a return type is Task or Task<T>.");
                 }
 
                 var proxyMethod = typeBuilder.DefineMethod(
                     methodInfo.Name,
                     MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.SpecialName | MethodAttributes.Virtual,
                     returnType,
-                    parameters.Length == 0 ? null : new[] { parameters[0].ParameterType });
+                    new[] { parameters[0].ParameterType });
 
                 typeBuilder.DefineMethodOverride(proxyMethod, methodInfo);
 
@@ -104,19 +104,12 @@ namespace Microsoft.Azure.WebJobs
                 ilGenerator.Emit(OpCodes.Ldarg_0);
                 ilGenerator.Emit(OpCodes.Ldstr, methodInfo.Name);
 
-                if (parameters.Length == 0)
-                {
-                    ilGenerator.Emit(OpCodes.Ldnull);
-                }
-                else
-                {
-                    ilGenerator.Emit(OpCodes.Ldarg_1);
+                ilGenerator.Emit(OpCodes.Ldarg_1);
 
-                    // ValueType needs boxing.
-                    if (parameters[0].ParameterType.IsValueType)
-                    {
-                        ilGenerator.Emit(OpCodes.Box, parameters[0].ParameterType);
-                    }
+                // ValueType needs boxing.
+                if (parameters[0].ParameterType.IsValueType)
+                {
+                    ilGenerator.Emit(OpCodes.Box, parameters[0].ParameterType);
                 }
 
                 ilGenerator.DeclareLocal(returnType);

@@ -1,4 +1,4 @@
-using Microsoft.Azure.WebJobs;
+﻿using Microsoft.Azure.WebJobs;
 
 namespace FunctionApp67
 {

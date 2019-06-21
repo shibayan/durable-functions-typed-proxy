@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Net.Http;
+﻿using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using Microsoft.Azure.WebJobs;
@@ -8,33 +8,30 @@ using Microsoft.Extensions.Logging;
 
 namespace FunctionApp67
 {
-    public class Function1
+    public static class Function2
     {
-        [FunctionName("Function1")]
-        public async Task<List<string>> RunOrchestrator(
+        [FunctionName("Function2")]
+        public static async Task<string> RunOrchestrator(
             [OrchestrationTrigger] DurableOrchestrationContext context)
         {
-            var outputs = new List<string>();
-
             var proxy = context.CreateActivityProxy<ISampleActivity>();
 
-            // Replace "hello" with the name of your Durable Activity Function.
-            outputs.Add(await proxy.SayHello("Tokyo"));
-            outputs.Add(await proxy.SayHello("Seattle"));
-            outputs.Add(await proxy.SayHello("London"));
+            // ブチザッキのタイトルを取る
+            var content = await proxy.HttpGet("https://blog.azure.moe/");
 
-            // returns ["Hello Tokyo!", "Hello Seattle!", "Hello London!"]
-            return outputs;
+            var match = Regex.Match(content, @"<title>(.+?)<\/title>");
+
+            return match.Success ? match.Groups[1].Value : "";
         }
 
-        [FunctionName("Function1_HttpStart")]
-        public async Task<HttpResponseMessage> HttpStart(
+        [FunctionName("Function2_HttpStart")]
+        public static async Task<HttpResponseMessage> HttpStart(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")]HttpRequestMessage req,
             [OrchestrationClient]DurableOrchestrationClient starter,
             ILogger log)
         {
             // Function input comes from the request content.
-            string instanceId = await starter.StartNewAsync("Function1", null);
+            string instanceId = await starter.StartNewAsync("Function2", null);
 
             log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
 

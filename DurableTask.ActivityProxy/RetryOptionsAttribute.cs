@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace Microsoft.Azure.WebJobs
 {
@@ -21,6 +23,8 @@ namespace Microsoft.Azure.WebJobs
         public double? BackoffCoefficient { get; set; }
         public string RetryTimeout { get; set; }
         public int MaxNumberOfAttempts { get; }
+        public Type HandlerType { get; set; }
+        public string HandlerMethodName { get; set; }
 
         internal RetryOptions ToRetryOptions()
         {
@@ -41,7 +45,26 @@ namespace Microsoft.Azure.WebJobs
                 retryOptions.RetryTimeout = TimeSpan.Parse(RetryTimeout);
             }
 
+            if (HandlerType != null && !string.IsNullOrEmpty(HandlerMethodName))
+            {
+                retryOptions.Handle = HandlerCache.GetOrAdd((HandlerType, HandlerMethodName), CreateDelegate);
+            }
+
             return retryOptions;
+        }
+
+        private static readonly ConcurrentDictionary<(Type, string), Func<Exception, bool>> HandlerCache = new ConcurrentDictionary<(Type, string), Func<Exception, bool>>();
+
+        private static Func<Exception, bool> CreateDelegate((Type Type, string MethodName) input)
+        {
+            var methodInfo = input.Type.GetMethod(input.MethodName, BindingFlags.Public | BindingFlags.Static);
+
+            if (methodInfo == null)
+            {
+                throw new InvalidOperationException($"{input.Type.FullName}.{input.MethodName} static method not found.");
+            }
+
+            return (Func<Exception, bool>)Delegate.CreateDelegate(typeof(Func<Exception, bool>), methodInfo);
         }
     }
 }

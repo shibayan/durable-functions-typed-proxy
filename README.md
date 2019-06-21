@@ -52,6 +52,34 @@ public class Function1
 }
 ```
 
+## Advanced usage
+
+### Retry options
+
+```csharp
+public interface IHttpGetActivity
+{
+    [RetryOptions("00:00:05", 10)]
+    Task<string> HttpGet(string path);
+}
+
+public class HttpGetActivity : IHttpGetActivity
+{
+    public HttpGetActivity(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
+    }
+
+    private readonly HttpClient _httpClient;
+
+    [FunctionName(nameof(HttpGet))]
+    public Task<string> HttpGet([ActivityTrigger] string path)
+    {
+        return _httpClient.GetStringAsync(path);
+    }
+}
+```
+
 ## Blog
 
 - https://blog.shibayan.jp/entry/20190621/1561114911

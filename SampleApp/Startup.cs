@@ -3,9 +3,11 @@
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
-[assembly: FunctionsStartup(typeof(FunctionApp67.Startup))]
+using SampleApp;
 
-namespace FunctionApp67
+[assembly: FunctionsStartup(typeof(Startup))]
+
+namespace SampleApp
 {
     public class Startup : FunctionsStartup
     {

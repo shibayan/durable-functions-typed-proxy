@@ -3,7 +3,7 @@
     /// <summary>
     /// Extension methods.
     /// </summary>
-    public static class DurableActivityProxyExtensions
+    public static class ActivityProxyExtensions
     {
         public static TActivityInterface CreateActivityProxy<TActivityInterface>(this DurableOrchestrationContext context)
         {

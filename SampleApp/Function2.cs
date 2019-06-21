@@ -2,13 +2,13 @@
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-using FunctionApp67.Activities;
-
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 
-namespace FunctionApp67
+using SampleApp.Activities;
+
+namespace SampleApp
 {
     public class Function2
     {

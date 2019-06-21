@@ -7,7 +7,12 @@ namespace Microsoft.Azure.WebJobs
     {
         public RetryOptionsAttribute(string firstRetryInterval, int maxNumberOfAttempts)
         {
-            FirstRetryInterval = firstRetryInterval;
+            if (maxNumberOfAttempts <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxNumberOfAttempts));
+            }
+
+            FirstRetryInterval = firstRetryInterval ?? throw new ArgumentNullException(nameof(firstRetryInterval));
             MaxNumberOfAttempts = maxNumberOfAttempts;
         }
 

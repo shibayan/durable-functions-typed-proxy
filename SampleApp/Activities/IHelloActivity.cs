@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace FunctionApp67.Activities
+namespace SampleApp.Activities
 {
     public interface IHelloActivity
     {

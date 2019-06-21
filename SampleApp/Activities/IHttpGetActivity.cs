@@ -2,7 +2,7 @@
 
 using Microsoft.Azure.WebJobs;
 
-namespace FunctionApp67.Activities
+namespace SampleApp.Activities
 {
     public interface IHttpGetActivity
     {

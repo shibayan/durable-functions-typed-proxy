@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Azure.WebJobs;
 
-namespace FunctionApp67.Activities
+namespace SampleApp.Activities
 {
     public class HttpGetActivity : IHttpGetActivity
     {

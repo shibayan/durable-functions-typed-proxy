@@ -1,8 +1,6 @@
 ﻿using System;
 
-using Microsoft.Azure.WebJobs;
-
-namespace FunctionApp67
+namespace Microsoft.Azure.WebJobs
 {
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class RetryOptionsAttribute : Attribute

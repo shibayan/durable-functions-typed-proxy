@@ -1,9 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 
-using Microsoft.Azure.WebJobs;
-
-namespace FunctionApp67
+namespace Microsoft.Azure.WebJobs
 {
     public abstract class ActivityProxy<TActivityInterface>
     {

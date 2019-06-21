@@ -2,6 +2,8 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
+using FunctionApp67.Activities;
+
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
@@ -16,7 +18,7 @@ namespace FunctionApp67
         {
             var outputs = new List<string>();
 
-            var proxy = context.CreateActivityProxy<ISampleActivity>();
+            var proxy = context.CreateActivityProxy<IHelloActivity>();
 
             // Replace "hello" with the name of your Durable Activity Function.
             outputs.Add(await proxy.SayHello("Tokyo"));
@@ -38,7 +40,7 @@ namespace FunctionApp67
 
             log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
 
-            return starter.CreateCheckStatusResponse(req, instanceId);
+            return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(req, instanceId);
         }
     }
 }

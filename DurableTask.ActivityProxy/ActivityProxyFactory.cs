@@ -5,9 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading.Tasks;
 
-using Microsoft.Azure.WebJobs;
-
-namespace FunctionApp67
+namespace Microsoft.Azure.WebJobs
 {
     internal static class ActivityProxyFactory
     {

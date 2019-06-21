@@ -1,6 +1,4 @@
-﻿using Microsoft.Azure.WebJobs;
-
-namespace FunctionApp67
+﻿namespace Microsoft.Azure.WebJobs
 {
     /// <summary>
     /// Extension methods.

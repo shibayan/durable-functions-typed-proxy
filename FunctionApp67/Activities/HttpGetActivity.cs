@@ -3,22 +3,16 @@ using System.Threading.Tasks;
 
 using Microsoft.Azure.WebJobs;
 
-namespace FunctionApp67
+namespace FunctionApp67.Activities
 {
-    public class SampleActivity : ISampleActivity
+    public class HttpGetActivity : IHttpGetActivity
     {
-        public SampleActivity(HttpClient httpClient)
+        public HttpGetActivity(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
 
         private readonly HttpClient _httpClient;
-
-        [FunctionName(nameof(SayHello))]
-        public Task<string> SayHello([ActivityTrigger] string name)
-        {
-            return Task.FromResult($"Hello {name}!");
-        }
 
         [FunctionName(nameof(HttpGet))]
         public async Task<string> HttpGet([ActivityTrigger] string path)

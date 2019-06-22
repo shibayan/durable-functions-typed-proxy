@@ -2,13 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.0-beta</Version>
+    <Version>1.0.0-preview</Version>
     <Authors>shibayan</Authors>
     <Company>shibayan</Company>
     <Product>DurableTask.ActivityProxy</Product>
     <RepositoryUrl>https://github.com/shibayan/durable-functions-activity-proxy</RepositoryUrl>
     <PackageId>DurableTask.ActivityProxy</PackageId>
     <Description>Type-safe activity helper for Durable Functions</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>

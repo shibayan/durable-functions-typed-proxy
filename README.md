@@ -16,6 +16,7 @@ DurableTask.ActivityProxy | .NET Standard 2.0 | [![NuGet](https://img.shields.io
 // Contract for activity
 public interface IHelloActivity
 {
+    // The return type must be Task or Task <T>
     Task<string> SayHello(string name);
 }
 
@@ -41,6 +42,7 @@ public class Function1
     {
         var outputs = new List<string>();
 
+        // Create activity proxy with interface
         var proxy = context.CreateActivityProxy<IHelloActivity>();
 
         // Replace "hello" with the name of your Durable Activity Function.
@@ -59,6 +61,7 @@ public class Function1
 ```csharp
 public interface IHttpGetActivity
 {
+    // Declarative RetryOptions definition
     [RetryOptions("00:00:05", 10)]
     Task<string> HttpGet(string path);
 }
@@ -87,6 +90,7 @@ public class HttpGetActivity : IHttpGetActivity
 ```csharp
 public static class RetryStrategy
 {
+    // Implemented custom retry handler
     public static bool HttpError(Exception ex)
     {
         return ex.InnerException is HttpRequestException;
@@ -95,6 +99,7 @@ public static class RetryStrategy
 
 public interface IHttpGetActivity
 {
+    // Set HandlerType and HandlerMethodName
     [RetryOptions("00:00:05", 10, HandlerType = typeof(RetryStrategy), HandlerMethodName = nameof(RetryStrategy.HttpError))]
     Task<string> HttpGet(string path);
 }

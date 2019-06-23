@@ -85,6 +85,14 @@ public class HttpGetActivity : IHttpGetActivity
 ### Custom retry handler
 
 ```csharp
+public static class RetryStrategy
+{
+    public static bool HttpError(Exception ex)
+    {
+        return ex.InnerException is HttpRequestException;
+    }
+}
+
 public interface IHttpGetActivity
 {
     [RetryOptions("00:00:05", 10, HandlerType = typeof(RetryStrategy), HandlerMethodName = nameof(RetryStrategy.HttpError))]
@@ -104,14 +112,6 @@ public class HttpGetActivity : IHttpGetActivity
     public Task<string> HttpGet([ActivityTrigger] string path)
     {
         return _httpClient.GetStringAsync(path);
-    }
-}
-
-public static class RetryStrategy
-{
-    public static bool HttpError(Exception ex)
-    {
-        return ex.InnerException is HttpRequestException;
     }
 }
 ```

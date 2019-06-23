@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Microsoft.Azure.WebJobs
@@ -36,12 +37,12 @@ namespace Microsoft.Azure.WebJobs
             return _context.CallActivityAsync<TResult>(functionName, input);
         }
 
+        private static readonly ConcurrentDictionary<string, RetryOptionsAttribute> RetryOptionsCache = new ConcurrentDictionary<string, RetryOptionsAttribute>();
+
         private static RetryOptions ResolveRetryOptions(string functionName)
         {
-            var attribute = typeof(TActivityInterface).GetMethod(functionName)
-                                                      .GetCustomAttributes(typeof(RetryOptionsAttribute), true)
-                                                      .Cast<RetryOptionsAttribute>()
-                                                      .FirstOrDefault();
+            var attribute = RetryOptionsCache.GetOrAdd(functionName, x => typeof(TActivityInterface).GetMethod(x)
+                                                                                                    ?.GetCustomAttribute<RetryOptionsAttribute>(true));
 
             return attribute?.ToRetryOptions();
         }

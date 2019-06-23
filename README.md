@@ -1,5 +1,7 @@
 # Type-safe activity helper for Durable Functions
 
+[![Build status](https://ci.appveyor.com/api/projects/status/ftq9q7l8wr7ynpn2/branch/master?svg=true)](https://ci.appveyor.com/project/shibayan/durable-functions-activity-proxy/branch/master)
+
 ## NuGet Packages
 
 Package Name | Target Framework | NuGet
@@ -52,8 +54,6 @@ public class Function1
 }
 ```
 
-## Advanced usage
-
 ### Retry options
 
 ```csharp
@@ -80,6 +80,42 @@ public class HttpGetActivity : IHttpGetActivity
 }
 ```
 
+## Advanced usage
+
+### Custom retry handler
+
+```csharp
+public interface IHttpGetActivity
+{
+    [RetryOptions("00:00:05", 10, HandlerType = typeof(RetryStrategy), HandlerMethodName = nameof(RetryStrategy.HttpError))]
+    Task<string> HttpGet(string path);
+}
+
+public class HttpGetActivity : IHttpGetActivity
+{
+    public HttpGetActivity(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
+    }
+
+    private readonly HttpClient _httpClient;
+
+    [FunctionName(nameof(HttpGet))]
+    public Task<string> HttpGet([ActivityTrigger] string path)
+    {
+        return _httpClient.GetStringAsync(path);
+    }
+}
+
+public static RetryStrategy
+{
+    public static bool HttpError(Exception ex)
+    {
+        return ex.InnerException is HttpRequestException;
+    }
+}
+```
+
 ## Blog
 
-- https://blog.shibayan.jp/entry/20190621/1561114911
+- https://blog.shibayan.jp/entry/20190621/1561114911 (Japanese)

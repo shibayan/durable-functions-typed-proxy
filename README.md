@@ -119,3 +119,7 @@ public static class RetryStrategy
 ## Blog
 
 - https://blog.shibayan.jp/entry/20190621/1561114911 (Japanese)
+
+## License
+
+This project is licensed under the [Apache License 2.0](https://github.com/shibayan/durable-functions-activity-proxy/blob/master/LICENSE)

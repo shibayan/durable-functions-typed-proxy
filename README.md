@@ -107,7 +107,7 @@ public class HttpGetActivity : IHttpGetActivity
     }
 }
 
-public static RetryStrategy
+public static class RetryStrategy
 {
     public static bool HttpError(Exception ex)
     {

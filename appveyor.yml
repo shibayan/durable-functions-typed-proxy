@@ -1,0 +1,20 @@
+version: '{build}'
+
+branches:
+  only:
+    - master
+
+pull_requests:
+  do_not_increment_build_number: true
+
+skip_commits:
+  files:
+    - README.md
+
+image:
+  - Visual Studio 2017
+
+build_script:
+  - dotnet build
+
+test: off

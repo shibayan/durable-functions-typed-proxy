@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -73,8 +74,18 @@ namespace Microsoft.Azure.WebJobs
             var callAsyncMethod = activityProxyMethods.First(x => x.Name == nameof(ActivityProxy<object>.CallAsync) && !x.IsGenericMethod);
             var callAsyncGenericMethod = activityProxyMethods.First(x => x.Name == nameof(ActivityProxy<object>.CallAsync) && x.IsGenericMethod);
 
+            var functionNames = LookupFunctionNames(interfaceType);
+
             foreach (var methodInfo in methods)
             {
+                var functionName = functionNames[methodInfo.Name];
+
+                // Check that `FunctionNameAttribute` exists
+                if (string.IsNullOrEmpty(functionName))
+                {
+                    throw new InvalidOperationException("FunctionName is not set.");
+                }
+
                 var parameters = methodInfo.GetParameters();
 
                 // check that the number of arguments is one
@@ -102,7 +113,7 @@ namespace Microsoft.Azure.WebJobs
                 var ilGenerator = proxyMethod.GetILGenerator();
 
                 ilGenerator.Emit(OpCodes.Ldarg_0);
-                ilGenerator.Emit(OpCodes.Ldstr, methodInfo.Name);
+                ilGenerator.Emit(OpCodes.Ldstr, functionName);
 
                 ilGenerator.Emit(OpCodes.Ldarg_1);
 
@@ -121,6 +132,27 @@ namespace Microsoft.Azure.WebJobs
 
                 ilGenerator.Emit(OpCodes.Ret);
             }
+        }
+
+        private static Dictionary<string, string> LookupFunctionNames(Type interfaceType)
+        {
+            var implementedTypes = interfaceType.Assembly
+                                                .GetTypes()
+                                                .Where(x => x.IsClass && !x.IsAbstract && interfaceType.IsAssignableFrom(x))
+                                                .ToArray();
+
+            if (!implementedTypes.Any())
+            {
+                throw new InvalidOperationException($"Cannot found {interfaceType.Name} implemented type.");
+            }
+
+            if (implementedTypes.Length > 1)
+            {
+                throw new InvalidOperationException("Activity type is ambiguous.");
+            }
+
+            return implementedTypes[0].GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                                      .ToDictionary(x => x.Name, x => x.GetCustomAttribute<FunctionNameAttribute>()?.Name);
         }
     }
 }

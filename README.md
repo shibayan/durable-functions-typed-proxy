@@ -10,7 +10,7 @@ DurableTask.ActivityProxy | .NET Standard 2.0 | [![NuGet](https://img.shields.io
 
 ## Basic usage
 
-### Write activity
+### 1. Implement the activity
 
 ```csharp
 // Contract for activity
@@ -31,7 +31,7 @@ public class HelloActivity : IHelloActivity
 }
 ```
 
-### Create proxy and called methods
+### 2. Create type-safe proxy and called methods
 
 ```csharp
 public class Function1
@@ -42,7 +42,7 @@ public class Function1
     {
         var outputs = new List<string>();
 
-        // Create activity proxy with interface
+        // Create type-safe activity proxy with interface
         var proxy = context.CreateActivityProxy<IHelloActivity>();
 
         // Replace "hello" with the name of your Durable Activity Function.
@@ -52,6 +52,30 @@ public class Function1
 
         // returns ["Hello Tokyo!", "Hello Seattle!", "Hello London!"]
         return outputs;
+    }
+}
+```
+
+## Advanced usage
+
+### Use ILogger
+
+```csharp
+public class HelloActivity : IHelloActivity
+{
+    public HelloActivity(ILoggerFactory loggerFactory)
+    {
+        // Create logger instance
+        _logger = loggerFactory.CreateLogger<HelloActivity>();
+    }
+    
+    private readonly ILogger _logger;
+
+    [FunctionName(nameof(SayHello))]
+    public Task<string> SayHello([ActivityTrigger] string name)
+    {
+        _logger.LogInformation($"Saying hello to {name}.");
+        return Task.FromResult($"Hello {name}!");
     }
 }
 ```
@@ -75,6 +99,7 @@ public class HttpGetActivity : IHttpGetActivity
 
     private readonly HttpClient _httpClient;
 
+    // In case of failure, retry is performed transparently
     [FunctionName(nameof(HttpGet))]
     public Task<string> HttpGet([ActivityTrigger] string path)
     {
@@ -83,14 +108,12 @@ public class HttpGetActivity : IHttpGetActivity
 }
 ```
 
-## Advanced usage
-
 ### Custom retry handler
 
 ```csharp
 public static class RetryStrategy
 {
-    // Implemented custom retry handler
+    // Implement custom retry handler
     public static bool HttpError(Exception ex)
     {
         return ex.InnerException is HttpRequestException;
@@ -99,7 +122,7 @@ public static class RetryStrategy
 
 public interface IHttpGetActivity
 {
-    // Set HandlerType and HandlerMethodName
+    // Must be setting HandlerType and HandlerMethodName
     [RetryOptions("00:00:05", 10, HandlerType = typeof(RetryStrategy), HandlerMethodName = nameof(RetryStrategy.HttpError))]
     Task<string> HttpGet(string path);
 }

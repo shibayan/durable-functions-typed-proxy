@@ -18,7 +18,7 @@ build_script:
   - ps: |
       dotnet build -c Release
       if ($env:APPVEYOR_REPO_TAG -eq $true) {
-          dotnet pack -c Release --no-build -p:Version=$env:APPVEYOR_REPO_TAG_NAME.Substring(1)
+          dotnet pack -c Release --no-build -p:Version=$($env:APPVEYOR_REPO_TAG_NAME.Substring(1))
       }
 
 test: off

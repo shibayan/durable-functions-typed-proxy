@@ -30,6 +30,11 @@ namespace Microsoft.Azure.WebJobs
 
         private static Type CreateProxyType(Type interfaceType)
         {
+            if (!interfaceType.IsInterface)
+            {
+                throw new InvalidOperationException($"{interfaceType.Name} is not an interface.");
+            }
+
             var baseType = typeof(ActivityProxy<>).MakeGenericType(interfaceType);
 
             var typeName = $"{interfaceType.Name}_{Guid.NewGuid():N}";
@@ -143,7 +148,7 @@ namespace Microsoft.Azure.WebJobs
 
             if (!implementedTypes.Any())
             {
-                throw new InvalidOperationException($"Cannot found {interfaceType.Name} implemented type.");
+                throw new InvalidOperationException($"Cannot found {interfaceType.Name} implemented activity type.");
             }
 
             if (implementedTypes.Length > 1)

@@ -4,6 +4,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Azure.WebJobs
 {
+    /// <summary>
+    /// Provides the base implementation for the activity proxy.
+    /// </summary>
+    /// <typeparam name="TActivityInterface">Activity interface.</typeparam>
     public abstract class ActivityProxy<TActivityInterface>
     {
         protected ActivityProxy(DurableOrchestrationContext context)

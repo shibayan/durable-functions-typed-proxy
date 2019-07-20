@@ -30,10 +30,7 @@ namespace Microsoft.Azure.WebJobs
 
         private static Type CreateProxyType(Type interfaceType)
         {
-            if (!interfaceType.IsInterface)
-            {
-                throw new InvalidOperationException($"{interfaceType.Name} is not an interface.");
-            }
+            ValidateInterface(interfaceType);
 
             var baseType = typeof(ActivityProxy<>).MakeGenericType(interfaceType);
 
@@ -50,6 +47,24 @@ namespace Microsoft.Azure.WebJobs
             BuildMethods(typeBuilder, interfaceType, baseType);
 
             return typeBuilder.CreateTypeInfo();
+        }
+
+        private static void ValidateInterface(Type interfaceType)
+        {
+            if (!interfaceType.IsInterface)
+            {
+                throw new InvalidOperationException($"{interfaceType.Name} is not an interface.");
+            }
+
+            if (interfaceType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Length > 0)
+            {
+                throw new InvalidOperationException($"Interface '{interfaceType.FullName}' can not define properties.");
+            }
+
+            if (interfaceType.GetMethods(BindingFlags.Instance | BindingFlags.Public).Length == 0)
+            {
+                throw new InvalidOperationException($"Interface '{interfaceType.FullName}' has no defined method.");
+            }
         }
 
         private static void BuildConstructor(TypeBuilder typeBuilder, Type baseType)
@@ -96,7 +111,7 @@ namespace Microsoft.Azure.WebJobs
                 // check that the number of arguments is one
                 if (parameters.Length != 1)
                 {
-                    throw new InvalidOperationException("Only a single argument can be used for operation input.");
+                    throw new InvalidOperationException($"Method '{methodInfo.Name}' is only a single argument can be used for operation input.");
                 }
 
                 var returnType = methodInfo.ReturnType;
@@ -104,7 +119,7 @@ namespace Microsoft.Azure.WebJobs
                 // check that return type is Task or Task<T>.
                 if (!(returnType == typeof(Task) || returnType.BaseType == typeof(Task)))
                 {
-                    throw new InvalidOperationException("Only a return type is Task or Task<T>.");
+                    throw new InvalidOperationException($"Method '{methodInfo.Name}' is only a return type is Task or Task<T>.");
                 }
 
                 var proxyMethod = typeBuilder.DefineMethod(
@@ -148,12 +163,12 @@ namespace Microsoft.Azure.WebJobs
 
             if (!implementedTypes.Any())
             {
-                throw new InvalidOperationException($"Cannot found {interfaceType.Name} implemented activity type.");
+                throw new InvalidOperationException($"Cannot find class that implements {interfaceType.FullName}.");
             }
 
             if (implementedTypes.Length > 1)
             {
-                throw new InvalidOperationException("Activity type is ambiguous.");
+                throw new InvalidOperationException("Ambiguous derived class with implemented {interfaceType.FullName}.");
             }
 
             return implementedTypes[0].GetMethods(BindingFlags.Public | BindingFlags.Instance)

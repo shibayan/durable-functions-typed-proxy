@@ -1,6 +1,6 @@
 # Type-safe activity helper for Durable Functions
 
-[![Build status](https://ci.appveyor.com/api/projects/status/ftq9q7l8wr7ynpn2/branch/master?svg=true)](https://ci.appveyor.com/project/shibayan/durable-functions-activity-proxy/branch/master)
+[![Build Status](https://dev.azure.com/shibayan/durable-functions-activity-proxy/_apis/build/status/Build%20ActivityProxy?branchName=master)](https://dev.azure.com/shibayan/durable-functions-activity-proxy/_build/latest?definitionId=23&branchName=master)
 
 ## NuGet Packages
 

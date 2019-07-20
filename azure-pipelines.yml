@@ -47,7 +47,7 @@ stages:
 - stage: Publish
   dependsOn:
   - Build
-  condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v'))
   jobs:
   - deployment: Publish_Nupkg
     environment: release

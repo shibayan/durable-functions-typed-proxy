@@ -15,9 +15,9 @@ namespace SampleApp
         public static async Task<string> RunOrchestrator(
             [OrchestrationTrigger] DurableOrchestrationContext context)
         {
-            var proxy = context.CreateActivityProxy<IAliasActivity>();
+            var activity = context.CreateActivityProxy<IAliasActivity>();
 
-            return await proxy.SayHello("buchizo");
+            return await activity.SayHello("buchizo");
         }
 
         [FunctionName("Function5_HttpStart")]

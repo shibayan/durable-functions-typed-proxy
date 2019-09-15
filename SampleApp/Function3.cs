@@ -17,7 +17,7 @@ namespace SampleApp
         public async Task<List<string>> RunOrchestrator(
             [OrchestrationTrigger] DurableOrchestrationContext context)
         {
-            var proxy = context.CreateActivityProxy<IHelloActivity>();
+            var activity = context.CreateActivityProxy<IHelloActivity>();
 
             var input = new[] { "Tokyo", "Seattle", "London" };
 
@@ -25,7 +25,7 @@ namespace SampleApp
 
             for (int i = 0; i < input.Length; i++)
             {
-                tasks[i] = proxy.SayHello(input[i]);
+                tasks[i] = activity.SayHello(input[i]);
             }
 
             await Task.WhenAll(tasks);

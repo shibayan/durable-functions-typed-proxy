@@ -16,10 +16,10 @@ namespace SampleApp
         public async Task<string> RunOrchestrator(
             [OrchestrationTrigger] DurableOrchestrationContext context)
         {
-            var proxy = context.CreateActivityProxy<IHttpGetActivity>();
+            var activity = context.CreateActivityProxy<IHttpGetActivity>();
 
             // ブチザッキのタイトルを取る
-            var content = await proxy.HttpGet("https://blog.azure.moe/");
+            var content = await activity.HttpGet("https://blog.azure.moe/");
 
             var match = Regex.Match(content, @"<title>(.+?)<\/title>");
 

@@ -18,12 +18,12 @@ namespace SampleApp
         {
             var outputs = new List<string>();
 
-            var proxy = context.CreateActivityProxy<IHelloActivity>();
+            var activity = context.CreateActivityProxy<IHelloActivity>();
 
             // Replace "hello" with the name of your Durable Activity Function.
-            outputs.Add(await proxy.SayHello("Tokyo"));
-            outputs.Add(await proxy.SayHello("Seattle"));
-            outputs.Add(await proxy.SayHello("London"));
+            outputs.Add(await activity.SayHello("Tokyo"));
+            outputs.Add(await activity.SayHello("Seattle"));
+            outputs.Add(await activity.SayHello("London"));
 
             // returns ["Hello Tokyo!", "Hello Seattle!", "Hello London!"]
             return outputs;

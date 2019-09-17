@@ -1,8 +1,8 @@
-﻿using System.Collections.Concurrent;
-using System.Reflection;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace Microsoft.Azure.WebJobs
+using Microsoft.Azure.WebJobs;
+
+namespace DurableTask.ActivityProxy
 {
     /// <summary>
     /// Provides the base implementation for the activity proxy.
@@ -19,7 +19,7 @@ namespace Microsoft.Azure.WebJobs
 
         protected internal Task CallAsync(string functionName, object input)
         {
-            var retryOptions = ResolveRetryOptions(functionName);
+            var retryOptions = RetryOptionsCache.ResolveRetryOptions<TActivityInterface>(functionName);
 
             if (retryOptions != null)
             {
@@ -31,7 +31,7 @@ namespace Microsoft.Azure.WebJobs
 
         protected internal Task<TResult> CallAsync<TResult>(string functionName, object input)
         {
-            var retryOptions = ResolveRetryOptions(functionName);
+            var retryOptions = RetryOptionsCache.ResolveRetryOptions<TActivityInterface>(functionName);
 
             if (retryOptions != null)
             {
@@ -39,16 +39,6 @@ namespace Microsoft.Azure.WebJobs
             }
 
             return _context.CallActivityAsync<TResult>(functionName, input);
-        }
-
-        private static readonly ConcurrentDictionary<string, RetryOptionsAttribute> RetryOptionsCache = new ConcurrentDictionary<string, RetryOptionsAttribute>();
-
-        private static RetryOptions ResolveRetryOptions(string functionName)
-        {
-            var attribute = RetryOptionsCache.GetOrAdd(functionName, x => typeof(TActivityInterface).GetMethod(x)
-                                                                                                    ?.GetCustomAttribute<RetryOptionsAttribute>(true));
-
-            return attribute?.ToRetryOptions();
         }
     }
 }

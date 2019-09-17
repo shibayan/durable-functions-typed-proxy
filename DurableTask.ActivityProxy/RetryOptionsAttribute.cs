@@ -55,13 +55,15 @@ namespace Microsoft.Azure.WebJobs
 
         private static readonly ConcurrentDictionary<(Type, string), Func<Exception, bool>> HandlerCache = new ConcurrentDictionary<(Type, string), Func<Exception, bool>>();
 
-        private static Func<Exception, bool> CreateDelegate((Type Type, string MethodName) input)
+        private static Func<Exception, bool> CreateDelegate((Type handlerType, string methodName) input)
         {
-            var methodInfo = input.Type.GetMethod(input.MethodName, BindingFlags.Public | BindingFlags.Static);
+            var (handlerType, methodName) = input;
+
+            var methodInfo = handlerType.GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
 
             if (methodInfo == null)
             {
-                throw new InvalidOperationException($"{input.Type.FullName}.{input.MethodName} static method not found.");
+                throw new InvalidOperationException($"{handlerType.FullName}.{methodName} static method not found.");
             }
 
             return (Func<Exception, bool>)Delegate.CreateDelegate(typeof(Func<Exception, bool>), methodInfo);

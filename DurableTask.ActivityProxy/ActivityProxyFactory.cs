@@ -6,7 +6,9 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading.Tasks;
 
-namespace Microsoft.Azure.WebJobs
+using Microsoft.Azure.WebJobs;
+
+namespace DurableTask.ActivityProxy
 {
     internal static class ActivityProxyFactory
     {

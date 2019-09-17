@@ -15,9 +15,9 @@ namespace SampleApp
         public static async Task RunOrchestrator(
             [OrchestrationTrigger] DurableOrchestrationContext context)
         {
-            var proxy = context.CreateActivityProxy<INullActivity>();
+            var activity = context.CreateActivityProxy<INullActivity>();
 
-            await proxy.Nop();
+            await activity.Nop();
         }
 
         [FunctionName("Function4_HttpStart")]

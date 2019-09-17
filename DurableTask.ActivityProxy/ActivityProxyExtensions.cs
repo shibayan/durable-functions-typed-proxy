@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Azure.WebJobs
+﻿using DurableTask.ActivityProxy;
+
+namespace Microsoft.Azure.WebJobs
 {
     /// <summary>
     /// Defines convenient overloads for creating activity proxy.

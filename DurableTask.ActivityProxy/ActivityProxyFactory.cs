@@ -23,7 +23,7 @@ namespace DurableTask.ActivityProxy
             DynamicModuleBuilder = assemblyBuilder.DefineDynamicModule("DynamicModule");
         }
 
-        internal static TActivityInterface Create<TActivityInterface>(DurableOrchestrationContext context)
+        internal static TActivityInterface Create<TActivityInterface>(IDurableOrchestrationContext context)
         {
             var type = TypeMappings.GetOrAdd(typeof(TActivityInterface), CreateProxyType);
 
@@ -71,7 +71,7 @@ namespace DurableTask.ActivityProxy
 
         private static void BuildConstructor(TypeBuilder typeBuilder, Type baseType)
         {
-            var ctorArgTypes = new[] { typeof(DurableOrchestrationContext) };
+            var ctorArgTypes = new[] { typeof(IDurableOrchestrationContext) };
 
             // Create ctor
             var ctor = typeBuilder.DefineConstructor(

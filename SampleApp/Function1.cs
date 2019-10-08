@@ -14,7 +14,7 @@ namespace SampleApp
     {
         [FunctionName("Function1")]
         public async Task<List<string>> RunOrchestrator(
-            [OrchestrationTrigger] DurableOrchestrationContext context)
+            [OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             var outputs = new List<string>();
 
@@ -31,8 +31,8 @@ namespace SampleApp
 
         [FunctionName("Function1_HttpStart")]
         public async Task<HttpResponseMessage> HttpStart(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")]HttpRequestMessage req,
-            [OrchestrationClient]DurableOrchestrationClient starter,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestMessage req,
+            [DurableClient] IDurableClient starter,
             ILogger log)
         {
             // Function input comes from the request content.

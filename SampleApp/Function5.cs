@@ -13,7 +13,7 @@ namespace SampleApp
     {
         [FunctionName("Function5")]
         public static async Task<string> RunOrchestrator(
-            [OrchestrationTrigger] DurableOrchestrationContext context)
+            [OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             var activity = context.CreateActivityProxy<IAliasActivity>();
 
@@ -22,8 +22,8 @@ namespace SampleApp
 
         [FunctionName("Function5_HttpStart")]
         public static async Task<HttpResponseMessage> HttpStart(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")]HttpRequestMessage req,
-            [OrchestrationClient]DurableOrchestrationClient starter,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestMessage req,
+            [DurableClient] IDurableClient starter,
             ILogger log)
         {
             // Function input comes from the request content.

@@ -10,12 +10,12 @@ namespace DurableTask.ActivityProxy
     /// <typeparam name="TActivityInterface">Activity interface.</typeparam>
     public abstract class ActivityProxy<TActivityInterface>
     {
-        protected ActivityProxy(DurableOrchestrationContext context)
+        protected ActivityProxy(IDurableOrchestrationContext context)
         {
             _context = context;
         }
 
-        private readonly DurableOrchestrationContext _context;
+        private readonly IDurableOrchestrationContext _context;
 
         protected internal Task CallAsync(string functionName, object input)
         {

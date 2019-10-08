@@ -13,7 +13,7 @@ namespace Microsoft.Azure.WebJobs
         /// <typeparam name="TActivityInterface">Activity interface.</typeparam>
         /// <param name="context">Current orchestration context.</param>
         /// <returns>New activity proxy instance.</returns>
-        public static TActivityInterface CreateActivityProxy<TActivityInterface>(this DurableOrchestrationContext context)
+        public static TActivityInterface CreateActivityProxy<TActivityInterface>(this IDurableOrchestrationContext context)
         {
             return ActivityProxyFactory.Create<TActivityInterface>(context);
         }

@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
-namespace DurableTask.ActivityProxy
+namespace DurableTask.TypedProxy
 {
     /// <summary>
     /// Provides the base implementation for the activity proxy.

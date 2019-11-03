@@ -1,6 +1,6 @@
-﻿using DurableTask.ActivityProxy;
+﻿using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
-namespace Microsoft.Azure.WebJobs
+namespace DurableTask.TypedProxy
 {
     /// <summary>
     /// Defines convenient overloads for creating activity proxy.

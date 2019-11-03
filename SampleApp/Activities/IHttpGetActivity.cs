@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
 
+using DurableTask.TypedProxy;
+
 using Microsoft.Azure.WebJobs;
 
 namespace SampleApp.Activities

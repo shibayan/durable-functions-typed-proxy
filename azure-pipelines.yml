@@ -38,7 +38,7 @@ stages:
         packDirectory: '$(Build.SourcesDirectory)/dist'
         versioningScheme: byEnvVar
         versionEnvVar: PackageVersion
-        verbosityPack: Normal
+        verbosityPack: Minimal
 
     - publish: dist
       artifact: nupkg

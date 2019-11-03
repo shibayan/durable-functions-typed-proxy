@@ -5,11 +5,11 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="1.8.3" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="2.0.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.29" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DurableTask.ActivityProxy\DurableTask.ActivityProxy.csproj" />
+    <ProjectReference Include="..\DurableTask.TypedProxy\DurableTask.TypedProxy.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
-namespace DurableTask.ActivityProxy
+namespace DurableTask.TypedProxy
 {
     internal static class RetryOptionsCache
     {

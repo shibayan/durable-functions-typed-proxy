@@ -2,7 +2,10 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace Microsoft.Azure.WebJobs
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+
+namespace DurableTask.TypedProxy
 {
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class RetryOptionsAttribute : Attribute

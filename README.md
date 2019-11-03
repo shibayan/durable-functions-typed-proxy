@@ -1,12 +1,12 @@
 # Type-safe activity helper for Durable Functions
 
-[![Build Status](https://dev.azure.com/shibayan/durable-functions-activity-proxy/_apis/build/status/Build%20ActivityProxy?branchName=master)](https://dev.azure.com/shibayan/durable-functions-activity-proxy/_build/latest?definitionId=23&branchName=master)
+[![Build Status](https://dev.azure.com/shibayan/durable-functions-typed-proxy/_apis/build/status/Build%20TypedProxy?branchName=master)](https://dev.azure.com/shibayan/durable-functions-typed-proxy/_build/latest?definitionId=23&branchName=master)
 
 ## NuGet Packages
 
 Package Name | Target Framework | NuGet
 ---|---|---
-DurableTask.ActivityProxy | .NET Standard 2.0 | [![NuGet](https://img.shields.io/nuget/v/DurableTask.ActivityProxy.svg)](https://www.nuget.org/packages/DurableTask.ActivityProxy)
+DurableTask.TypedProxy | .NET Standard 2.0 | [![NuGet](https://img.shields.io/nuget/v/DurableTask.TypedProxy.svg)](https://www.nuget.org/packages/DurableTask.TypedProxy)
 
 ## Basic usage
 
@@ -150,4 +150,4 @@ public class HttpGetActivity : IHttpGetActivity
 
 ## License
 
-This project is licensed under the [Apache License 2.0](https://github.com/shibayan/durable-functions-activity-proxy/blob/master/LICENSE)
+This project is licensed under the [Apache License 2.0](https://github.com/shibayan/durable-functions-typed-proxy/blob/master/LICENSE)

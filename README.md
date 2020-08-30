@@ -1,6 +1,7 @@
 # Type-safe activity helper for Durable Functions
 
-[![Build Status](https://dev.azure.com/shibayan/durable-functions-typed-proxy/_apis/build/status/Build%20TypedProxy?branchName=master)](https://dev.azure.com/shibayan/durable-functions-typed-proxy/_build/latest?definitionId=43&branchName=master)
+![Build](https://github.com/shibayan/durable-functions-typed-proxy/workflows/Build/badge.svg)
+[![License](https://img.shields.io/github/license/shibayan/durable-functions-typed-proxy.svg)](https://github.com/shibayan/durable-functions-typed-proxy/blob/master/LICENSE)
 
 ## NuGet Packages
 

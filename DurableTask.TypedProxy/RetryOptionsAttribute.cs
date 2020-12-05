@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 
-using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace DurableTask.TypedProxy
@@ -27,7 +26,7 @@ namespace DurableTask.TypedProxy
         public string RetryTimeout { get; set; }
         public int MaxNumberOfAttempts { get; }
         public Type HandlerType { get; set; }
-        public string HandlerMethodName { get; set; }
+        public string HandlerMethodName { get; set; } = "Handle";
 
         internal RetryOptions ToRetryOptions()
         {

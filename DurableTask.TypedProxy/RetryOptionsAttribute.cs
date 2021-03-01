@@ -22,7 +22,7 @@ namespace DurableTask.TypedProxy
 
         public string FirstRetryInterval { get; }
         public string MaxRetryInterval { get; set; }
-        public double? BackoffCoefficient { get; set; }
+        public double BackoffCoefficient { get; set; }
         public string RetryTimeout { get; set; }
         public int MaxNumberOfAttempts { get; }
         public Type HandlerType { get; set; }
@@ -37,9 +37,9 @@ namespace DurableTask.TypedProxy
                 retryOptions.MaxRetryInterval = TimeSpan.Parse(MaxRetryInterval);
             }
 
-            if (BackoffCoefficient.HasValue)
+            if (BackoffCoefficient > 0)
             {
-                retryOptions.BackoffCoefficient = BackoffCoefficient.Value;
+                retryOptions.BackoffCoefficient = BackoffCoefficient;
             }
 
             if (!string.IsNullOrEmpty(RetryTimeout))

@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace SampleApp.Activities
+namespace SampleApp.Activities;
+
+public interface INullActivity
 {
-    public interface INullActivity
-    {
-        Task Nop(object input = null);
-    }
+    Task Nop(object input = null);
 }

@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace SampleApp.Activities
+namespace SampleApp.Activities;
+
+public interface IHelloActivity
 {
-    public interface IHelloActivity
-    {
-        Task<string> SayHello(string name);
-    }
+    Task<string> SayHello(string name);
 }

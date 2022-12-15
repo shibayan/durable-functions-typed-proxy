@@ -11,36 +11,35 @@ using Microsoft.Extensions.Logging;
 
 using SampleApp.Activities;
 
-namespace SampleApp
+namespace SampleApp;
+
+public class Function2
 {
-    public class Function2
+    [FunctionName("Function2")]
+    public async Task<string> RunOrchestrator(
+        [OrchestrationTrigger] IDurableOrchestrationContext context)
     {
-        [FunctionName("Function2")]
-        public async Task<string> RunOrchestrator(
-            [OrchestrationTrigger] IDurableOrchestrationContext context)
-        {
-            var activity = context.CreateActivityProxy<IHttpGetActivity>();
+        var activity = context.CreateActivityProxy<IHttpGetActivity>();
 
-            // ブチザッキのタイトルを取る
-            var content = await activity.HttpGet("https://blog.azure.moe/");
+        // ブチザッキのタイトルを取る
+        var content = await activity.HttpGet("https://blog.azure.moe/");
 
-            var match = Regex.Match(content, @"<title>(.+?)<\/title>");
+        var match = Regex.Match(content, @"<title>(.+?)<\/title>");
 
-            return match.Success ? match.Groups[1].Value : "";
-        }
+        return match.Success ? match.Groups[1].Value : "";
+    }
 
-        [FunctionName("Function2_HttpStart")]
-        public async Task<HttpResponseMessage> HttpStart(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestMessage req,
-            [DurableClient] IDurableClient starter,
-            ILogger log)
-        {
-            // Function input comes from the request content.
-            string instanceId = await starter.StartNewAsync("Function2", null);
+    [FunctionName("Function2_HttpStart")]
+    public async Task<HttpResponseMessage> HttpStart(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestMessage req,
+        [DurableClient] IDurableClient starter,
+        ILogger log)
+    {
+        // Function input comes from the request content.
+        string instanceId = await starter.StartNewAsync("Function2", null);
 
-            log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
+        log.LogInformation($"Started orchestration with ID = '{instanceId}'.");
 
-            return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(req, instanceId);
-        }
+        return await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(req, instanceId);
     }
 }

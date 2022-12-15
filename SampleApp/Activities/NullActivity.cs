@@ -3,14 +3,13 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
-namespace SampleApp.Activities
+namespace SampleApp.Activities;
+
+public class NullActivity : INullActivity
 {
-    public class NullActivity : INullActivity
+    [FunctionName(nameof(Nop))]
+    public Task Nop([ActivityTrigger] object input)
     {
-        [FunctionName(nameof(Nop))]
-        public Task Nop([ActivityTrigger] object input)
-        {
-            return Task.CompletedTask;
-        }
+        return Task.CompletedTask;
     }
 }

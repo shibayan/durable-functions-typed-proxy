@@ -3,14 +3,13 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
-namespace SampleApp.Activities
+namespace SampleApp.Activities;
+
+public class AliasActivity : IAliasActivity
 {
-    public class AliasActivity : IAliasActivity
+    [FunctionName("Say")]
+    public Task<string> SayHello([ActivityTrigger] string name)
     {
-        [FunctionName("Say")]
-        public Task<string> SayHello([ActivityTrigger] string name)
-        {
-            return Task.FromResult($"Hello {name}.");
-        }
+        return Task.FromResult($"Hello {name}.");
     }
 }

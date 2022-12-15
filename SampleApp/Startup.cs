@@ -7,13 +7,12 @@ using SampleApp;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 
-namespace SampleApp
+namespace SampleApp;
+
+public class Startup : FunctionsStartup
 {
-    public class Startup : FunctionsStartup
+    public override void Configure(IFunctionsHostBuilder builder)
     {
-        public override void Configure(IFunctionsHostBuilder builder)
-        {
-            builder.Services.AddSingleton(new HttpClient());
-        }
+        builder.Services.AddSingleton(new HttpClient());
     }
 }

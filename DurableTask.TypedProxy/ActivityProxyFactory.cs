@@ -9,173 +9,172 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
-namespace DurableTask.TypedProxy
+namespace DurableTask.TypedProxy;
+
+internal static class ActivityProxyFactory
 {
-    internal static class ActivityProxyFactory
+    private static readonly ModuleBuilder s_dynamicModuleBuilder;
+    private static readonly ConcurrentDictionary<Type, Type> s_typeMappings = new();
+
+    static ActivityProxyFactory()
     {
-        private static readonly ModuleBuilder DynamicModuleBuilder;
-        private static readonly ConcurrentDictionary<Type, Type> TypeMappings = new ConcurrentDictionary<Type, Type>();
+        var assemblyName = new AssemblyName($"DynamicAssembly_{Guid.NewGuid():N}");
+        var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
 
-        static ActivityProxyFactory()
+        s_dynamicModuleBuilder = assemblyBuilder.DefineDynamicModule("DynamicModule");
+    }
+
+    internal static TActivityInterface Create<TActivityInterface>(IDurableOrchestrationContext context)
+    {
+        var type = s_typeMappings.GetOrAdd(typeof(TActivityInterface), CreateProxyType);
+
+        return (TActivityInterface)Activator.CreateInstance(type, context);
+    }
+
+    private static Type CreateProxyType(Type interfaceType)
+    {
+        ValidateInterface(interfaceType);
+
+        var baseType = typeof(ActivityProxy<>).MakeGenericType(interfaceType);
+
+        var typeName = $"{interfaceType.Name}_{Guid.NewGuid():N}";
+
+        var typeBuilder = s_dynamicModuleBuilder.DefineType(
+            typeName,
+            TypeAttributes.Public | TypeAttributes.BeforeFieldInit | TypeAttributes.AnsiClass,
+            baseType);
+
+        typeBuilder.AddInterfaceImplementation(interfaceType);
+
+        BuildConstructor(typeBuilder, baseType);
+        BuildMethods(typeBuilder, interfaceType, baseType);
+
+        return typeBuilder.CreateTypeInfo();
+    }
+
+    private static void ValidateInterface(Type interfaceType)
+    {
+        if (!interfaceType.IsInterface)
         {
-            var assemblyName = new AssemblyName($"DynamicAssembly_{Guid.NewGuid():N}");
-            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-
-            DynamicModuleBuilder = assemblyBuilder.DefineDynamicModule("DynamicModule");
+            throw new InvalidOperationException($"{interfaceType.Name} is not an interface.");
         }
 
-        internal static TActivityInterface Create<TActivityInterface>(IDurableOrchestrationContext context)
+        if (interfaceType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Length > 0)
         {
-            var type = TypeMappings.GetOrAdd(typeof(TActivityInterface), CreateProxyType);
-
-            return (TActivityInterface)Activator.CreateInstance(type, context);
+            throw new InvalidOperationException($"Interface '{interfaceType.FullName}' can not define properties.");
         }
 
-        private static Type CreateProxyType(Type interfaceType)
+        if (interfaceType.GetMethods(BindingFlags.Instance | BindingFlags.Public).Length == 0)
         {
-            ValidateInterface(interfaceType);
-
-            var baseType = typeof(ActivityProxy<>).MakeGenericType(interfaceType);
-
-            var typeName = $"{interfaceType.Name}_{Guid.NewGuid():N}";
-
-            var typeBuilder = DynamicModuleBuilder.DefineType(
-                typeName,
-                TypeAttributes.Public | TypeAttributes.BeforeFieldInit | TypeAttributes.AnsiClass,
-                baseType);
-
-            typeBuilder.AddInterfaceImplementation(interfaceType);
-
-            BuildConstructor(typeBuilder, baseType);
-            BuildMethods(typeBuilder, interfaceType, baseType);
-
-            return typeBuilder.CreateTypeInfo();
+            throw new InvalidOperationException($"Interface '{interfaceType.FullName}' has no defined method.");
         }
+    }
 
-        private static void ValidateInterface(Type interfaceType)
+    private static void BuildConstructor(TypeBuilder typeBuilder, Type baseType)
+    {
+        var ctorArgTypes = new[] { typeof(IDurableOrchestrationContext) };
+
+        // Create ctor
+        var ctor = typeBuilder.DefineConstructor(
+            MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
+            CallingConventions.Standard,
+            ctorArgTypes);
+
+        var ilGenerator = ctor.GetILGenerator();
+
+        ilGenerator.Emit(OpCodes.Ldarg_0);
+        ilGenerator.Emit(OpCodes.Ldarg_1);
+        ilGenerator.Emit(OpCodes.Call, baseType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, ctorArgTypes, null));
+        ilGenerator.Emit(OpCodes.Ret);
+    }
+
+    private static void BuildMethods(TypeBuilder typeBuilder, Type interfaceType, Type baseType)
+    {
+        var methods = interfaceType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
+
+        var activityProxyMethods = baseType.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance);
+
+        var callAsyncMethod = activityProxyMethods.First(x => x.Name == nameof(ActivityProxy<object>.CallAsync) && !x.IsGenericMethod);
+        var callAsyncGenericMethod = activityProxyMethods.First(x => x.Name == nameof(ActivityProxy<object>.CallAsync) && x.IsGenericMethod);
+
+        var functionNames = LookupFunctionNames(interfaceType);
+
+        foreach (var methodInfo in methods)
         {
-            if (!interfaceType.IsInterface)
+            var functionName = functionNames[methodInfo.Name];
+
+            // Check that `FunctionNameAttribute` exists
+            if (string.IsNullOrEmpty(functionName))
             {
-                throw new InvalidOperationException($"{interfaceType.Name} is not an interface.");
+                throw new InvalidOperationException("FunctionName is not set.");
             }
 
-            if (interfaceType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Length > 0)
+            var parameters = methodInfo.GetParameters();
+
+            // check that the number of arguments is one
+            if (parameters.Length != 1)
             {
-                throw new InvalidOperationException($"Interface '{interfaceType.FullName}' can not define properties.");
+                throw new InvalidOperationException($"Method '{methodInfo.Name}' is only a single argument can be used for operation input.");
             }
 
-            if (interfaceType.GetMethods(BindingFlags.Instance | BindingFlags.Public).Length == 0)
+            var returnType = methodInfo.ReturnType;
+
+            // check that return type is Task or Task<T>.
+            if (!(returnType == typeof(Task) || returnType.BaseType == typeof(Task)))
             {
-                throw new InvalidOperationException($"Interface '{interfaceType.FullName}' has no defined method.");
+                throw new InvalidOperationException($"Method '{methodInfo.Name}' is only a return type is Task or Task<T>.");
             }
-        }
 
-        private static void BuildConstructor(TypeBuilder typeBuilder, Type baseType)
-        {
-            var ctorArgTypes = new[] { typeof(IDurableOrchestrationContext) };
+            var proxyMethod = typeBuilder.DefineMethod(
+                methodInfo.Name,
+                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.SpecialName | MethodAttributes.Virtual,
+                returnType,
+                new[] { parameters[0].ParameterType });
 
-            // Create ctor
-            var ctor = typeBuilder.DefineConstructor(
-                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName,
-                CallingConventions.Standard,
-                ctorArgTypes);
+            typeBuilder.DefineMethodOverride(proxyMethod, methodInfo);
 
-            var ilGenerator = ctor.GetILGenerator();
+            var ilGenerator = proxyMethod.GetILGenerator();
 
             ilGenerator.Emit(OpCodes.Ldarg_0);
+            ilGenerator.Emit(OpCodes.Ldstr, functionName);
+
             ilGenerator.Emit(OpCodes.Ldarg_1);
-            ilGenerator.Emit(OpCodes.Call, baseType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, ctorArgTypes, null));
+
+            // ValueType needs boxing.
+            if (parameters[0].ParameterType.IsValueType)
+            {
+                ilGenerator.Emit(OpCodes.Box, parameters[0].ParameterType);
+            }
+
+            ilGenerator.DeclareLocal(returnType);
+
+            ilGenerator.Emit(OpCodes.Call, returnType.IsGenericType ? callAsyncGenericMethod.MakeGenericMethod(returnType.GetGenericArguments()[0]) : callAsyncMethod);
+
+            ilGenerator.Emit(OpCodes.Stloc_0);
+            ilGenerator.Emit(OpCodes.Ldloc_0);
+
             ilGenerator.Emit(OpCodes.Ret);
         }
+    }
 
-        private static void BuildMethods(TypeBuilder typeBuilder, Type interfaceType, Type baseType)
+    private static Dictionary<string, string> LookupFunctionNames(Type interfaceType)
+    {
+        var implementedTypes = interfaceType.Assembly
+                                            .GetTypes()
+                                            .Where(x => x.IsClass && !x.IsAbstract && interfaceType.IsAssignableFrom(x))
+                                            .ToArray();
+
+        if (!implementedTypes.Any())
         {
-            var methods = interfaceType.GetMethods(BindingFlags.Instance | BindingFlags.Public);
-
-            var activityProxyMethods = baseType.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance);
-
-            var callAsyncMethod = activityProxyMethods.First(x => x.Name == nameof(ActivityProxy<object>.CallAsync) && !x.IsGenericMethod);
-            var callAsyncGenericMethod = activityProxyMethods.First(x => x.Name == nameof(ActivityProxy<object>.CallAsync) && x.IsGenericMethod);
-
-            var functionNames = LookupFunctionNames(interfaceType);
-
-            foreach (var methodInfo in methods)
-            {
-                var functionName = functionNames[methodInfo.Name];
-
-                // Check that `FunctionNameAttribute` exists
-                if (string.IsNullOrEmpty(functionName))
-                {
-                    throw new InvalidOperationException("FunctionName is not set.");
-                }
-
-                var parameters = methodInfo.GetParameters();
-
-                // check that the number of arguments is one
-                if (parameters.Length != 1)
-                {
-                    throw new InvalidOperationException($"Method '{methodInfo.Name}' is only a single argument can be used for operation input.");
-                }
-
-                var returnType = methodInfo.ReturnType;
-
-                // check that return type is Task or Task<T>.
-                if (!(returnType == typeof(Task) || returnType.BaseType == typeof(Task)))
-                {
-                    throw new InvalidOperationException($"Method '{methodInfo.Name}' is only a return type is Task or Task<T>.");
-                }
-
-                var proxyMethod = typeBuilder.DefineMethod(
-                    methodInfo.Name,
-                    MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.SpecialName | MethodAttributes.Virtual,
-                    returnType,
-                    new[] { parameters[0].ParameterType });
-
-                typeBuilder.DefineMethodOverride(proxyMethod, methodInfo);
-
-                var ilGenerator = proxyMethod.GetILGenerator();
-
-                ilGenerator.Emit(OpCodes.Ldarg_0);
-                ilGenerator.Emit(OpCodes.Ldstr, functionName);
-
-                ilGenerator.Emit(OpCodes.Ldarg_1);
-
-                // ValueType needs boxing.
-                if (parameters[0].ParameterType.IsValueType)
-                {
-                    ilGenerator.Emit(OpCodes.Box, parameters[0].ParameterType);
-                }
-
-                ilGenerator.DeclareLocal(returnType);
-
-                ilGenerator.Emit(OpCodes.Call, returnType.IsGenericType ? callAsyncGenericMethod.MakeGenericMethod(returnType.GetGenericArguments()[0]) : callAsyncMethod);
-
-                ilGenerator.Emit(OpCodes.Stloc_0);
-                ilGenerator.Emit(OpCodes.Ldloc_0);
-
-                ilGenerator.Emit(OpCodes.Ret);
-            }
+            throw new InvalidOperationException($"Cannot find class that implements {interfaceType.FullName}.");
         }
 
-        private static Dictionary<string, string> LookupFunctionNames(Type interfaceType)
+        if (implementedTypes.Length > 1)
         {
-            var implementedTypes = interfaceType.Assembly
-                                                .GetTypes()
-                                                .Where(x => x.IsClass && !x.IsAbstract && interfaceType.IsAssignableFrom(x))
-                                                .ToArray();
-
-            if (!implementedTypes.Any())
-            {
-                throw new InvalidOperationException($"Cannot find class that implements {interfaceType.FullName}.");
-            }
-
-            if (implementedTypes.Length > 1)
-            {
-                throw new InvalidOperationException("Ambiguous derived class with implemented {interfaceType.FullName}.");
-            }
-
-            return implementedTypes[0].GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                                      .ToDictionary(x => x.Name, x => x.GetCustomAttribute<FunctionNameAttribute>()?.Name);
+            throw new InvalidOperationException("Ambiguous derived class with implemented {interfaceType.FullName}.");
         }
+
+        return implementedTypes[0].GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                                  .ToDictionary(x => x.Name, x => x.GetCustomAttribute<FunctionNameAttribute>()?.Name);
     }
 }

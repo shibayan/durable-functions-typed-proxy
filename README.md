@@ -1,13 +1,9 @@
 # Type-safe activity helper for Durable Functions
 
-![Build](https://github.com/shibayan/durable-functions-typed-proxy/workflows/Build/badge.svg)
-[![License](https://img.shields.io/github/license/shibayan/durable-functions-typed-proxy.svg)](https://github.com/shibayan/durable-functions-typed-proxy/blob/master/LICENSE)
-
-## NuGet Packages
-
-Package Name | Target Framework | NuGet
----|---|---
-DurableTask.TypedProxy | .NET Standard 2.0 | [![NuGet](https://img.shields.io/nuget/v/DurableTask.TypedProxy.svg)](https://www.nuget.org/packages/DurableTask.TypedProxy)
+[![Build](https://github.com/shibayan/durable-functions-typed-proxy/workflows/Build/badge.svg)](https://github.com/shibayan/durable-functions-typed-proxy/actions/workflows/build.yml)
+[![Downloads](https://badgen.net/nuget/dt/DurableTask.TypedProxy)](https://www.nuget.org/packages/DurableTask.TypedProxy/)
+[![NuGet](https://badgen.net/nuget/v/DurableTask.TypedProxy)](https://www.nuget.org/packages/DurableTask.TypedProxy/)
+[![License](https://badgen.net/github/license/shibayan/durable-functions-typed-proxy)](https://github.com/shibayan/durable-functions-typed-proxy/blob/master/LICENSE)
 
 ## Basic usage
 
